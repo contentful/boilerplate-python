@@ -1,0 +1,68 @@
+#! /usr/bin/env bash
+
+NORMAL="\033[0m"
+BOLD="\033[1m"
+YELLOW="\033[33m"
+
+if [[ $# -eq 1 ]]; then
+  exit_status=1
+  echo "Usage:"
+  echo -e "\t$BOLD$YELLOW ./run$NORMAL$BOLD [SPACE_ID] [ACCESS_TOKEN]$NORMAL"
+  echo
+  echo -e "Parameters are optional. If passing$BOLD$YELLOW SPACE_ID$NORMAL,$BOLD$YELLOW ACCESS_TOKEN$NORMAL is required."
+  if [[ $1 == "-h" || $1 == "--help" ]]; then
+    exit_status=0
+  fi
+  exit $exit_status
+fi
+
+echo -e "\033[4mChecking requirements:$NORMAL"
+
+echo -e "Checking:$NORMAL$BOLD$YELLOW python$NORMAL"
+bash -c "python --version > /dev/null 2>&1"
+if [[ $? != 0 ]]; then
+  echo "Python is required for this project to run."
+  echo "For installation instructions, go to: https://www.python.org"
+  echo "Exiting!"
+  exit 1
+else
+  echo "OK"
+fi
+
+echo
+
+bash -c "python -m contentful.client > /dev/null 2>&1"
+if [[ $? != 0 ]]; then
+  echo -e "\033[4mInstalling dependencies:$NORMAL"
+  echo -e "Command:$NORMAL$BOLD$YELLOW pip install -r requirements.txt$NORMAL"
+  echo
+  printf "Your system's$BOLD$YELLOW pip$NORMAL may require$BOLD$YELLOW sudo$NORMAL permissions. Run with$BOLD$YELLOW sudo$NORMAL? (y/N): "
+  read install_with_sudo
+  if [[ $install_with_sudo == "y" || $install_with_sudo == "Y" ]]; then
+    sudo pip install -r requirements.txt
+  else
+    pip install -r requirements.txt
+  fi
+else
+  echo "Dependencies already installed. Skipping"
+fi
+
+echo
+
+if [[ $# -eq 2 ]]; then
+  echo -e "\033[4mSetting up Credentials:$NORMAL"
+  echo -e "Space ID:$NORMAL$BOLD$YELLOW $1$NORMAL"
+  sed -i "" -E "s/SPACE_ID = '[0-9a-zA-Z]+'/SPACE_ID = '$1'/g" script.py
+  echo -e "Access Token:$NORMAL$BOLD$YELLOW $2$NORMAL"
+  sed -i "" -E "s/ACCESS_TOKEN = '[0-9a-zA-Z]+'/ACCESS_TOKEN = '$2'/g" script.py
+  echo
+fi
+
+echo -e "\033[4mRunning Script:$NORMAL"
+echo -e "Command:$NORMAL$BOLD$YELLOW python script.py$NORMAL"
+echo
+python script.py
+
+echo
+
+echo -e "\033[1mCheck out$YELLOW script.py$NORMAL$BOLD to tweak this further and get started!$NORMAL"
