@@ -1,0 +1,80 @@
+#! /usr/bin/env bash
+
+NORMAL="\033[0m"
+BOLD="\033[1m"
+YELLOW="\033[33m"
+
+if [[ $# -eq 1 ]]; then
+  exit_status=1
+  echo "Usage:"
+  echo -e "\t$BOLD$YELLOW ./run$NORMAL"
+  if [[ $1 == "-h" || $1 == "--help" ]]; then
+    exit_status=0
+  fi
+  exit $exit_status
+fi
+
+echo -e "\033[4mChecking requirements:$NORMAL"
+
+echo -e "Checking:$NORMAL$BOLD$YELLOW python$NORMAL"
+bash -c "python --version > /dev/null 2>&1"
+if [[ $? != 0 ]]; then
+  echo "Python is required for this project to run."
+  echo "For installation instructions, go to: https://www.python.org"
+  echo "Exiting!"
+  exit 1
+else
+  echo "OK"
+fi
+
+echo
+
+echo -e "Checking:$NORMAL$BOLD$YELLOW pip$NORMAL"
+bash -c "pip --version > /dev/null 2>&1"
+if [[ $? != 0 ]]; then
+  printf "Pip is not installed. Want to install it? (Y/n): "
+  read install_pip
+  if [[ $install_pip == "n" || $install_pip == "N" ]]; then
+    echo "Pip is required for this project to run. Exiting!"
+    exit 1
+  else
+    printf "Your system's$BOLD$YELLOW easy_install$NORMAL may require$BOLD$YELLOW sudo$NORMAL permissions. Run with$BOLD$YELLOW sudo$NORMAL? (y/N): "
+    read install_with_sudo
+    if [[ $install_with_sudo == "y" || $install_with_sudo == "Y" ]]; then
+      sudo easy_install pip
+    else
+      easy_install pip
+    fi
+  fi
+else
+  echo "OK"
+fi
+
+echo
+
+bash -c "python -m contentful.client > /dev/null 2>&1"
+if [[ $? != 0 ]]; then
+  echo -e "\033[4mInstalling dependencies:$NORMAL"
+  echo -e "Command:$NORMAL$BOLD$YELLOW pip install -r requirements.txt$NORMAL"
+  echo
+  printf "Your system's$BOLD$YELLOW pip$NORMAL may require$BOLD$YELLOW sudo$NORMAL permissions. Run with$BOLD$YELLOW sudo$NORMAL? (y/N): "
+  read install_with_sudo
+  if [[ $install_with_sudo == "y" || $install_with_sudo == "Y" ]]; then
+    sudo pip install -r requirements.txt
+  else
+    pip install -r requirements.txt
+  fi
+else
+  echo "Dependencies already installed. Skipping"
+fi
+
+echo
+
+echo -e "\033[4mRunning Script:$NORMAL"
+echo -e "Command:$NORMAL$BOLD$YELLOW python script.py$NORMAL"
+echo
+python script.py
+
+echo
+
+echo -e "\033[1mCheck out$YELLOW script.py$NORMAL$BOLD to tweak this further and get started!$NORMAL"
