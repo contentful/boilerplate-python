@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 # This is an automatically generated file.
 
 from __future__ import print_function # For Python 2.7+ Compatibility
